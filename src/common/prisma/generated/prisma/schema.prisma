@@ -1,0 +1,73 @@
+generator client {
+  provider     = "prisma-client-js"
+  output       = "."
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model comments {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  userId    Int
+  imageId   Int
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  users     users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_1")
+  images    images   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_2")
+
+  @@index([imageId], map: "idx_imageId")
+  @@index([userId], map: "idx_userId")
+}
+
+model image_saves {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  imageId   Int
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  users     users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "image_saves_ibfk_1")
+  images    images   @relation(fields: [imageId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "image_saves_ibfk_2")
+
+  @@unique([userId, imageId], map: "unique_user_image")
+  @@index([imageId], map: "idx_imageId")
+  @@index([userId], map: "idx_userId")
+}
+
+model images {
+  id          Int           @id @default(autoincrement())
+  title       String?       @db.VarChar(255)
+  description String?       @db.Text
+  imageUrl    String?       @db.VarChar(255)
+  views       Int           @default(0)
+  userId      Int
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime      @default(now()) @db.Timestamp(0)
+  comments    comments[]
+  image_saves image_saves[]
+  users       users         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "images_ibfk_1")
+
+  @@index([title], map: "idx_title")
+  @@index([userId], map: "idx_userId")
+}
+
+model users {
+  id          Int           @id @default(autoincrement())
+  email       String        @unique(map: "email") @db.VarChar(255)
+  fullName    String?       @db.VarChar(255)
+  avatar      String?       @db.VarChar(255)
+  passWord    String?       @db.VarChar(255)
+  googleId    String?       @db.VarChar(255)
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime      @default(now()) @db.Timestamp(0)
+  role        String?       @default("user") @db.VarChar(50)
+  comments    comments[]
+  image_saves image_saves[]
+  images      images[]
+}
