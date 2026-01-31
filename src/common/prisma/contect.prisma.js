@@ -4,7 +4,8 @@ import { PrismaClient } from "./generated/prisma/index.js";
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL missing");
+  console.error("DATABASE_URL missing");
+  process.exit(1);
 }
 
 const dbUrl = new URL(DATABASE_URL);
@@ -14,7 +15,7 @@ const adapter = new PrismaMariaDb({
   user: dbUrl.username,
   password: dbUrl.password,
   database: dbUrl.pathname.substring(1),
-  port: parseInt(dbUrl.port),
+  port: Number(dbUrl.port),
   connectionLimit: 5,
 });
 
