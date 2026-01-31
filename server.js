@@ -6,28 +6,36 @@ import rootRouter from "./src/routers/root.router.js";
 
 const app = express();
 
+// ===== MIDDLEWARE =====
 app.use(express.static("./public"));
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: ["http://localhost:3000"],
-  }),
-);
+// Mở CORS cho tất cả (cho dễ deploy)
+app.use(cors());
 
+// ===== TEST ROUTE =====
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Backend API running",
+  });
+});
+
+// ===== API =====
 app.use("/api", rootRouter);
-app.use((req, res, next) => {
-  const method = req.method;
-  const url = req.originalUrl;
-  const ip = req.ip;
-  console.log(`${method} ${url} ${ip}`);
 
+// ===== LOG + NOT FOUND =====
+app.use((req, res, next) => {
+  console.log(req.method, req.originalUrl, req.ip);
   throw new NotFountException();
 });
+
+// ===== ERROR HANDLER =====
 app.use(appError);
 
-const port = 3069;
+// ===== PORT FOR DEPLOY =====
+const PORT = process.env.PORT || 3069;
 
-app.listen(port, () => {
-  console.log(port);
+app.listen(PORT, () => {
+  console.log("Server running on port:", PORT);
 });
